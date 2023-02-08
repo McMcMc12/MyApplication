@@ -9,6 +9,7 @@ public class VPadapter extends FragmentStateAdapter {
 
     private String[] titles= new String [] {"Items", "Chats", "Search"};
 
+
     public VPadapter(@NonNull FragmentActivity fragmentActivity) {
         super(fragmentActivity);
     }
@@ -19,13 +20,13 @@ public class VPadapter extends FragmentStateAdapter {
         switch (position)
         {
             case 0:
-                return new item_frag();
+                return new NewItemFrag();
             case 1:
-                return new chat_frag();
+                return new NewCartFrag();
             case 2:
                 return new Search_frag();
         }
-        return new item_frag();
+        return new NewItemFrag();
     }
 
     @Override

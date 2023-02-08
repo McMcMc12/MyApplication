@@ -1,17 +1,19 @@
 package com.example.myapplication;
 
-import android.net.Uri;
-
-public class inventory {
+public class Inventory{
     private String item_name, description, price, cat, user, imageUrl;
 
-    public inventory(String item_name, String description, String price, String cat, String user, String imageUrl) {
+    public Inventory(String item_name, String description, String price, String cat, String user, String imageUrl) {
         this.item_name = item_name;
         this.description = description;
         this.price = price;
         this.cat = cat;
         this.user = user;
         this.imageUrl = imageUrl;
+    }
+
+    public Inventory() {
+        super();
     }
 
     public String getItem_name() {

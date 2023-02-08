@@ -1,17 +1,12 @@
 package com.example.myapplication;
 
-import androidx.activity.result.ActivityResultCallback;
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-
-import android.app.appsearch.StorageInfo;
 import android.content.ContentResolver;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.provider.MediaStore;
 import android.view.View;
 import android.webkit.MimeTypeMap;
 import android.widget.AdapterView;
@@ -24,11 +19,13 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.example.myapplication.databinding.ActivityItemFormBinding;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
-import com.google.android.material.animation.Positioning;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -36,6 +33,10 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.StorageTask;
 import com.google.firebase.storage.UploadTask;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.Calendar;
 
 public class item_form extends AppCompatActivity implements View.OnClickListener, AdapterView.OnItemSelectedListener{
     ActivityItemFormBinding binding;
@@ -45,17 +46,23 @@ public class item_form extends AppCompatActivity implements View.OnClickListener
     private ImageView img_btn;
     private Spinner spin_cat;
     private ProgressBar progressBar;
-    private boolean mInitailized;
     private Uri newUri;
     private StorageReference mStorageRef;
     private StorageTask mUploadTask;
 
-    FirebaseAuth dbAuth;
     FirebaseDatabase dbRoot;
     DatabaseReference dbref;
-   // FirebaseStorage StorageReference;
+    FirebaseStorage Storage;
+
+
+
+
+
+
+
 
     public item_form() {
+
     }
 
 
@@ -68,7 +75,7 @@ public class item_form extends AppCompatActivity implements View.OnClickListener
         setContentView(binding.getRoot());
 
         mStorageRef = FirebaseStorage.getInstance().getReference("uploads");
-        dbref = FirebaseDatabase.getInstance().getReference("uploads");
+
 
 
         selectpic = registerForActivityResult(
@@ -82,11 +89,11 @@ public class item_form extends AppCompatActivity implements View.OnClickListener
                             TextView textView = findViewById(R.id.textView);
                             textView.setVisibility(View.GONE);
                             newUri = result;
+
                         }
                     }
                 }
         );
-
 
         itmName = findViewById(R.id.txt_item_name);
         itmDescription = findViewById(R.id.txtdes);
@@ -95,7 +102,6 @@ public class item_form extends AppCompatActivity implements View.OnClickListener
         spin_cat = findViewById(R.id.spincat);
         progressBar = findViewById(R.id.progressBar4);
         img_btn = findViewById(R.id.imgbtn);
-        dbAuth = FirebaseAuth.getInstance();
 
         submit.setOnClickListener(this);
         img_btn.setOnClickListener(this);
@@ -136,8 +142,6 @@ public class item_form extends AppCompatActivity implements View.OnClickListener
             String price = itmPrice.getText().toString().trim();
             String Category = spin_cat.getSelectedItem().toString();
 
-            Uri pic = newUri;
-
             //error checks
             if(name.isEmpty()) {
                 itmName.setError("Cannot be left empty");
@@ -162,16 +166,26 @@ public class item_form extends AppCompatActivity implements View.OnClickListener
                 img_btn.requestFocus();
             }
 
-            String user = dbAuth.getCurrentUser().toString().trim();
+            //DatabaseReference userref = FirebaseDatabase.getInstance().getReference("Inventory");
+
+            FirebaseAuth dbAuth = FirebaseAuth.getInstance();
+            String user = dbAuth.getCurrentUser().getUid();
+
             progressBar.setVisibility(View.VISIBLE);
 
 
-
-            DatabaseReference rootref = FirebaseDatabase.getInstance().getReference();
-            DatabaseReference taskref = rootref.child("Inventory").push();
-            StorageReference fileReference = mStorageRef.child(System.currentTimeMillis()
-                  + "." + getFileExtension(newUri));
-            mUploadTask = fileReference.putFile(newUri)
+            String time = Calendar.getInstance().getTime().toString();
+            StorageReference fileReference = mStorageRef.child(FirebaseAuth.getInstance().getCurrentUser().getUid());
+            Bitmap bitmap = null;
+            try{
+                bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), newUri);
+            }catch(IOException e){
+                e.printStackTrace();
+            }
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
+            byte[] fileInBytes = baos.toByteArray();
+            mUploadTask = fileReference.child(FirebaseAuth.getInstance().getCurrentUser().getUid()+"/"+time+"/").putBytes(fileInBytes)
                     .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                       @Override
                       public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
@@ -183,38 +197,49 @@ public class item_form extends AppCompatActivity implements View.OnClickListener
                             }
                         }, 500);
 
+                               final String pic = null;
+                               fileReference.child(FirebaseAuth.getInstance().getCurrentUser().getUid()+"/"+time+"/")
+                                       .getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                   @Override
+                                   public void onSuccess(Uri uri) {
+                                       Uri pic = uri;
+                                       Inventory Inventory = new Inventory(name, description, price, Category, user, pic.toString());
+                                       DatabaseReference rootref = FirebaseDatabase.getInstance().getReference();
+                                       DatabaseReference taskref = rootref.child("Inventory").push();
+                                       taskref.setValue(Inventory).addOnCompleteListener(task -> {
+                                           if (task.isSuccessful()) {
 
-                          inventory Inventory = new inventory(name, description, price, Category, user,
-                                  taskSnapshot.getMetadata().getReference().getDownloadUrl().toString());
-                          DatabaseReference rootref = FirebaseDatabase.getInstance().getReference();
-                          DatabaseReference taskref = rootref.child("Inventory").push();
+                                               Toast.makeText(item_form.this,"Item is succesfully registered!", Toast.LENGTH_LONG).show();
+                                               progressBar.setVisibility(View.GONE);
+                                               startActivity(new Intent(item_form.this, Feed.class));
 
-                          taskref.setValue(Inventory).addOnCompleteListener(task -> {
+                                           }else{
+                                               Toast.makeText(item_form.this,"Fail to load", Toast.LENGTH_LONG).show();
+                                               progressBar.setVisibility(View.GONE);
+                                           }
+                                       });
+                                   }
+                               });
+                              /* Inventory Inventory = new Inventory(name, description, price, Category, user, pic);
+                               DatabaseReference rootref = FirebaseDatabase.getInstance().getReference();
+                               DatabaseReference taskref = rootref.child("Inventory").push();
 
-                              if (task.isSuccessful()) {
-                                  Toast.makeText(item_form.this,"Item is succesfully registered!", Toast.LENGTH_LONG).show();
-                                  progressBar.setVisibility(View.GONE);
-                                  startActivity(new Intent(item_form.this, Feed.class));
+                               taskref.setValue(Inventory).addOnCompleteListener(task -> {
+                                      if (task.isSuccessful()) {
 
-                              }else{
-                                  Toast.makeText(item_form.this,"Fail to load", Toast.LENGTH_LONG).show();
-                                  progressBar.setVisibility(View.GONE);
+                                          Toast.makeText(item_form.this,"Item is succesfully registered!", Toast.LENGTH_LONG).show();
+                                          progressBar.setVisibility(View.GONE);
+                                          startActivity(new Intent(item_form.this, Feed.class));
+
+                                      }else{
+                                          Toast.makeText(item_form.this,"Fail to load", Toast.LENGTH_LONG).show();
+                                          progressBar.setVisibility(View.GONE);
                               }
-                          });
-
-
+                          });*/
                     }
                 });
 
-
-
-
-
-
         }
-
-
-
 
 
     @Override

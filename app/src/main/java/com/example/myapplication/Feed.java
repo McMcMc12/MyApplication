@@ -1,18 +1,14 @@
 package com.example.myapplication;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.viewpager.widget.ViewPager;
-import androidx.viewpager2.widget.ViewPager2;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.Button;
-import android.widget.GridView;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.viewpager2.widget.ViewPager2;
 
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
@@ -23,8 +19,7 @@ public class Feed extends AppCompatActivity {
     VPadapter vPadapter;
     TabLayout tabLayout;
     ViewPager2 view_Pager2;
-    GridView gridview;
-    private String[] titles= new String [] {"Items", "Chats", "Search"};
+    private String[] titles= new String [] {"Items", "Cart", "Search"};
 
 
 
@@ -40,6 +35,7 @@ public class Feed extends AppCompatActivity {
 
         view_Pager2.setAdapter(vPadapter);
         new TabLayoutMediator(tabLayout,view_Pager2,((tab, position) -> tab.setText(titles[position]))).attach();
+
     }
 
 
