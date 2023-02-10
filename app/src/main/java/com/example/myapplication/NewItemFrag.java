@@ -22,17 +22,8 @@ import com.google.firebase.storage.StorageReference;
 import java.util.ArrayList;
 
 
-
 public class NewItemFrag extends Fragment implements ItemViewInterface{
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
     private ArrayList<Inventory> itemArrayList;
     ItemAdapter itemAdapter;
     DatabaseReference databaseReference;
@@ -40,36 +31,6 @@ public class NewItemFrag extends Fragment implements ItemViewInterface{
     RecyclerView recyclerView;
 
 
-    public NewItemFrag() {
-        // Required empty public constructor
-    }
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment NewItemFrag.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static NewItemFrag newInstance(String param1, String param2) {
-        NewItemFrag fragment = new NewItemFrag();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -86,7 +47,7 @@ public class NewItemFrag extends Fragment implements ItemViewInterface{
 
         recyclerView = view.findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
-        //recyclerView.setHasFixedSize(true);
+        recyclerView.setHasFixedSize(true);
 
         itemArrayList = new ArrayList<>();
         itemAdapter = new ItemAdapter(getContext(), itemArrayList, this);
@@ -102,7 +63,6 @@ public class NewItemFrag extends Fragment implements ItemViewInterface{
                     Inventory inventory = dataSnapshot.getValue(Inventory.class);
 
                     itemArrayList.add(inventory);
-
                 }
                 itemAdapter.notifyDataSetChanged();
             }
@@ -114,6 +74,7 @@ public class NewItemFrag extends Fragment implements ItemViewInterface{
         });
 
         recyclerView.setAdapter(itemAdapter);
+
     }
 
 
@@ -129,6 +90,6 @@ public class NewItemFrag extends Fragment implements ItemViewInterface{
         bundle.putString("Url", itemArrayList.get(position).getImageUrl());
         itemDialog.setArguments(bundle);
 
-        itemDialog.show(getActivity().getSupportFragmentManager(), "item dialog");
+        itemDialog.show(requireActivity().getSupportFragmentManager(), "item dialog");
     }
 }

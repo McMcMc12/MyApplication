@@ -17,16 +17,15 @@ public class VPadapter extends FragmentStateAdapter {
     @NonNull
     @Override
     public Fragment createFragment(int position) {
-        switch (position)
-        {
-            case 0:
-                return new NewItemFrag();
-            case 1:
-                return new NewCartFrag();
-            case 2:
-                return new Search_frag();
+        if(position == 0 )  {
+            return new NewItemFrag();
+        }else if(position == 1)  {
+            return new cart_frag();
+        }else if(position == 2) {
+            return new Search_frag();
         }
-        return new NewItemFrag();
+
+        return null;
     }
 
     @Override

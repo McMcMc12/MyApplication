@@ -31,13 +31,11 @@ public class Feed extends AppCompatActivity {
         tabLayout = findViewById(R.id.tabLayout);
         vPadapter = new VPadapter(this);
 
-
-
         view_Pager2.setAdapter(vPadapter);
+        vPadapter.notifyDataSetChanged();
         new TabLayoutMediator(tabLayout,view_Pager2,((tab, position) -> tab.setText(titles[position]))).attach();
 
     }
-
 
 
     @Override
