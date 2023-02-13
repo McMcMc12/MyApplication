@@ -203,10 +203,12 @@ public class item_form extends AppCompatActivity implements View.OnClickListener
                                    @Override
                                    public void onSuccess(Uri uri) {
                                        Uri pic = uri;
-                                       Inventory Inventory = new Inventory(name, description, price, Category, user, pic.toString());
-                                       DatabaseReference rootref = FirebaseDatabase.getInstance().getReference();
-                                       DatabaseReference taskref = rootref.child("Inventory").push();
-                                       taskref.setValue(Inventory).addOnCompleteListener(task -> {
+                                       Inventory inventory = new Inventory(name, description, price, Category, user, pic.toString());
+                                       String key = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+                                       DatabaseReference rootref = FirebaseDatabase.getInstance().getReference("User");
+                                       DatabaseReference taskref = rootref.child(key).child("Inventory").push();
+                                       taskref.setValue(inventory).addOnCompleteListener(task -> {
                                            if (task.isSuccessful()) {
 
                                                Toast.makeText(item_form.this,"Item is succesfully registered!", Toast.LENGTH_LONG).show();
@@ -220,22 +222,6 @@ public class item_form extends AppCompatActivity implements View.OnClickListener
                                        });
                                    }
                                });
-                              /* Inventory Inventory = new Inventory(name, description, price, Category, user, pic);
-                               DatabaseReference rootref = FirebaseDatabase.getInstance().getReference();
-                               DatabaseReference taskref = rootref.child("Inventory").push();
-
-                               taskref.setValue(Inventory).addOnCompleteListener(task -> {
-                                      if (task.isSuccessful()) {
-
-                                          Toast.makeText(item_form.this,"Item is succesfully registered!", Toast.LENGTH_LONG).show();
-                                          progressBar.setVisibility(View.GONE);
-                                          startActivity(new Intent(item_form.this, Feed.class));
-
-                                      }else{
-                                          Toast.makeText(item_form.this,"Fail to load", Toast.LENGTH_LONG).show();
-                                          progressBar.setVisibility(View.GONE);
-                              }
-                          });*/
                     }
                 });
 

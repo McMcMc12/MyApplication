@@ -11,11 +11,11 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
@@ -52,17 +52,48 @@ public class NewItemFrag extends Fragment implements ItemViewInterface{
         itemArrayList = new ArrayList<>();
         itemAdapter = new ItemAdapter(getContext(), itemArrayList, this);
 
-        databaseReference = FirebaseDatabase.getInstance().getReference("Inventory");
+        databaseReference = FirebaseDatabase.getInstance().getReference("User");
         storageReference = FirebaseStorage.getInstance().getReference("uploads");
 
+        databaseReference.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                for (DataSnapshot childSnapshot: snapshot.child("Inventory").getChildren()) {
+                    Inventory inventory = childSnapshot.getValue(Inventory.class);
+                    itemArrayList.add(inventory);
+                }
+                itemAdapter.notifyDataSetChanged();
+            }
 
-        databaseReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
+            }
+
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot snapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+
+        });
+
+        /*databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                for(DataSnapshot dataSnapshot : snapshot.getChildren()){
+            for(DataSnapshot dataSnapshot : snapshot.getChildren()){
                     Inventory inventory = dataSnapshot.getValue(Inventory.class);
 
-                    itemArrayList.add(inventory);
+                   itemArrayList.add(inventory);
                 }
                 itemAdapter.notifyDataSetChanged();
             }
@@ -71,11 +102,11 @@ public class NewItemFrag extends Fragment implements ItemViewInterface{
             public void onCancelled(@NonNull DatabaseError error) {
 
             }
-        });
+       });*/
 
         recyclerView.setAdapter(itemAdapter);
 
-    }
+     }
 
 
     @Override

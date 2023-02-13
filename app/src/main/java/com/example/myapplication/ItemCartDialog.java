@@ -64,7 +64,7 @@ public class ItemCartDialog extends AppCompatDialogFragment {
 
         back.setOnClickListener(v -> {
             String user1 = FirebaseAuth.getInstance().getCurrentUser().getUid();
-            DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Cart").child(user1);
+            DatabaseReference reference = FirebaseDatabase.getInstance().getReference("User").child("Inventory").child(user1);
             reference.child(key).removeValue().addOnCompleteListener(task -> {
                 if(task.isSuccessful()) {
                     Intent intent = new Intent();

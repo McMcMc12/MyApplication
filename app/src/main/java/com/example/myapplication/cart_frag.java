@@ -51,7 +51,7 @@ public class cart_frag extends Fragment implements ItemViewInterface{
         cartArrayList = new ArrayList<>();
         cartAdapter = new CartAdapter(getContext(), cartArrayList, this);
         String user = Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid();
-        databaseReference = FirebaseDatabase.getInstance().getReference("Cart").child(user);
+        databaseReference = FirebaseDatabase.getInstance().getReference("User").child("Inventory").child("Cart").child(user);
         storageReference = FirebaseStorage.getInstance().getReference("uploads");
 
         databaseReference.addValueEventListener(new ValueEventListener() {
