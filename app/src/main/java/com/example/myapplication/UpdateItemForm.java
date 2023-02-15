@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.View;
 import android.webkit.MimeTypeMap;
 import android.widget.AdapterView;
@@ -54,7 +55,8 @@ public class UpdateItemForm extends AppCompatActivity implements View.OnClickLis
     private ImageView img_btn;
     private Spinner spin_cat;
     private ProgressBar progressBar;
-    private Uri newUri;
+    private Uri oldUri,newUri = null;
+    private String itemKey = "";
     private StorageReference mStorageRef;
     private StorageTask mUploadTask;
 
@@ -90,8 +92,9 @@ public class UpdateItemForm extends AppCompatActivity implements View.OnClickLis
         itmDescription.setText(getIntent().getStringExtra("dis"));
         itmPrice.setText(getIntent().getStringExtra("price"));
         Picasso.get().load(getIntent().getStringExtra("url")).into(img_btn);
+        itemKey = getIntent().getStringExtra("key");
 
-        newUri = Uri.parse(getIntent().getStringExtra("url"));
+        oldUri = Uri.parse(getIntent().getStringExtra("url"));
 
         selectpic = registerForActivityResult(
                 new ActivityResultContracts.GetContent(),
@@ -150,7 +153,7 @@ public class UpdateItemForm extends AppCompatActivity implements View.OnClickLis
         String description = itmDescription.getText().toString().trim();
         String price = itmPrice.getText().toString().trim();
         String Category = spin_cat.getSelectedItem().toString();
-        Uri uri = newUri;
+        //Uri uri = newUri;
 
 
         //error checks
@@ -170,13 +173,21 @@ public class UpdateItemForm extends AppCompatActivity implements View.OnClickLis
             return;
         }
 
+        //It means new Picture have been selected
         if(newUri != null  ) {
-
-        }else{
-            Toast.makeText(UpdateItemForm.this,"No Image selected", Toast.LENGTH_SHORT).show();
-            img_btn.requestFocus();
+            updateDataWithNewPic(name,description,price,Category);
+        }else{//Old Picture
+            updateDataWithOldPic(name,description,price,Category);
+            //Toast.makeText(UpdateItemForm.this,"No Image selected", Toast.LENGTH_SHORT).show();
+            //img_btn.requestFocus();
         }
 
+
+
+    }
+
+
+    private void updateDataWithOldPic(String name, String description,String  price,String  Category){
         FirebaseAuth dbAuth = FirebaseAuth.getInstance();
         String user = dbAuth.getCurrentUser().getUid();
 
@@ -195,16 +206,85 @@ public class UpdateItemForm extends AppCompatActivity implements View.OnClickLis
         map.put("imageUrl", getIntent().getStringExtra("url"));
         map.put("user", FirebaseAuth.getInstance().getCurrentUser().getUid());
 
+        Inventory inventory = new Inventory(name, description, price, Category, user, getIntent().getStringExtra("url"));
+        String key = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
-            Bitmap bitmap = null;
-            try {
-                bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), newUri);
-            } catch (IOException e) {
-                e.printStackTrace();
+
+        DatabaseReference rootref = FirebaseDatabase.getInstance().getReference("User");
+        DatabaseReference taskref = rootref.child(key).child("Inventory");
+        taskref.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                Log.d("Update Status", snapshot +"");
+                taskref.child(itemKey).setValue(inventory).addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+
+                        Toast.makeText(UpdateItemForm.this,"Item is succesfully registered!", Toast.LENGTH_LONG).show();
+                        progressBar.setVisibility(View.GONE);
+                        startActivity(new Intent(UpdateItemForm.this, Feed.class));
+
+                    }else{
+                        Toast.makeText(UpdateItemForm.this,"Fail to load", Toast.LENGTH_LONG).show();
+                        progressBar.setVisibility(View.GONE);
+                    }
+                });
             }
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
-            byte[] fileInBytes = baos.toByteArray();
+
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
+            }
+
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot snapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+
+
+    }
+
+    private void updateDataWithNewPic(String name, String description,String  price,String  Category){
+
+        FirebaseAuth dbAuth = FirebaseAuth.getInstance();
+        String user = dbAuth.getCurrentUser().getUid();
+
+        progressBar.setVisibility(View.VISIBLE);
+
+
+        String time = Calendar.getInstance().getTime().toString();
+        StorageReference fileReference = mStorageRef.child(FirebaseAuth.getInstance().getCurrentUser().getUid());
+
+        Map<String, Object> map = new HashMap<>();
+
+        map.put("item_name", name);
+        map.put("description", description);
+        map.put("price", price);
+        map.put("cat", Category);
+        map.put("imageUrl", newUri);
+        map.put("user", FirebaseAuth.getInstance().getCurrentUser().getUid());
+
+
+        Bitmap bitmap = null;
+        try {
+            bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), newUri);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
+        byte[] fileInBytes = baos.toByteArray();
 
         mUploadTask = fileReference.child(FirebaseAuth.getInstance().getCurrentUser().getUid()+"/"+time+"/").putBytes(fileInBytes)
                 .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
@@ -232,12 +312,7 @@ public class UpdateItemForm extends AppCompatActivity implements View.OnClickLis
                                         taskref.addChildEventListener(new ChildEventListener() {
                                             @Override
                                             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-
-                                            }
-
-                                            @Override
-                                            public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                                                taskref.child(previousChildName).setValue(inventory).addOnCompleteListener(task -> {
+                                                taskref.child(itemKey).setValue(inventory).addOnCompleteListener(task -> {
                                                     if (task.isSuccessful()) {
 
                                                         Toast.makeText(UpdateItemForm.this,"Item is succesfully registered!", Toast.LENGTH_LONG).show();
@@ -249,6 +324,11 @@ public class UpdateItemForm extends AppCompatActivity implements View.OnClickLis
                                                         progressBar.setVisibility(View.GONE);
                                                     }
                                                 });
+                                            }
+
+                                            @Override
+                                            public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
                                             }
 
                                             @Override
@@ -267,63 +347,11 @@ public class UpdateItemForm extends AppCompatActivity implements View.OnClickLis
                                             }
                                         });
 
-                                       /* taskref.setValue(inventory).addOnCompleteListener(task -> {
-                                            if (task.isSuccessful()) {
-
-                                                Toast.makeText(UpdateItemForm.this,"Item is succesfully registered!", Toast.LENGTH_LONG).show();
-                                                progressBar.setVisibility(View.GONE);
-                                                startActivity(new Intent(UpdateItemForm.this, Feed.class));
-
-                                            }else{
-                                                Toast.makeText(UpdateItemForm.this,"Fail to load", Toast.LENGTH_LONG).show();
-                                                progressBar.setVisibility(View.GONE);
-                                            }
-                                        });*/
                                     }
                                 });
                     }
                 });
 
-
-
-       /* mUploadTask = fileReference.child(FirebaseAuth.getInstance().getCurrentUser().getUid()+"/"+time+"/").putBytes(fileInBytes)
-                .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                    @Override
-                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                        Handler handler = new Handler();
-                        handler.postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-
-                            }
-                        }, 500);
-
-                        final String pic = null;
-                        fileReference.child(FirebaseAuth.getInstance().getCurrentUser().getUid()+"/"+time+"/")
-                                .getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                                    @Override
-                                    public void onSuccess(Uri uri) {
-                                        Uri pic = uri;
-                                        Inventory inventory = new Inventory(name, description, price, Category, user, pic.toString());
-                                        String key = FirebaseAuth.getInstance().getCurrentUser().getUid();
-                                        DatabaseReference rootref = FirebaseDatabase.getInstance().getReference("User");
-                                        DatabaseReference taskref = rootref.child(key).child("Inventory");
-                                        taskref.child(key+"_"+ Category + "_" + name).updateChildren(map).addOnCompleteListener(task -> {
-                                            if (task.isSuccessful()) {
-
-                                                Toast.makeText(UpdateItemForm.this,"Item is succesfully Updated!", Toast.LENGTH_LONG).show();
-                                                progressBar.setVisibility(View.GONE);
-                                                startActivity(new Intent(UpdateItemForm.this, Feed.class));
-
-                                            }else{
-                                                Toast.makeText(UpdateItemForm.this,"Fail to load", Toast.LENGTH_LONG).show();
-                                                progressBar.setVisibility(View.GONE);
-                                            }
-                                        });
-                                    }
-                                });
-                    }
-                });*/
 
     }
 

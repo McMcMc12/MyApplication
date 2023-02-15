@@ -45,6 +45,7 @@ public class MyInventoryDialog extends AppCompatDialogFragment {
         delete.setText("Delete");
         update.setText("Update");
 
+        String ItemKey = bundle.getString("key");
         String ItemName = bundle.getString("Name");
         String ItemCat = bundle.getString("Category");
         String ItemPrice = bundle.getString("Price");
@@ -77,7 +78,8 @@ public class MyInventoryDialog extends AppCompatDialogFragment {
         update.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-               Intent intent = new Intent(getActivity(), UpdateItemForm.class);
+                Intent intent = new Intent(getActivity(), UpdateItemForm.class);
+                intent.putExtra("key", ItemKey);
                 intent.putExtra("name", ItemName);
                 intent.putExtra("cat", ItemCat);
                 intent.putExtra("dis", ItemDis);

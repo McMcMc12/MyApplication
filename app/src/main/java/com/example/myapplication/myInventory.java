@@ -23,7 +23,7 @@ import java.util.ArrayList;
 public class myInventory extends AppCompatActivity implements ItemViewInterface{
 
     ActivityMyInventoryBinding binding;
-    ArrayList<Inventory> myArraylist;
+    ArrayList<UpdateInventory> myArraylist;
     private RecyclerView myrecyclerView;
     DatabaseReference dbref;
     StorageReference stref;
@@ -52,7 +52,8 @@ public class myInventory extends AppCompatActivity implements ItemViewInterface{
             @Override
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                 for (DataSnapshot childSnapshot: snapshot.child("Inventory").getChildren()) {
-                    Inventory inventory = childSnapshot.getValue(Inventory.class);
+                    UpdateInventory inventory = childSnapshot.getValue(UpdateInventory.class);
+                    inventory.setKey(childSnapshot.getKey());
                     myArraylist.add(inventory);
                 }
                 itemAdapter.notifyDataSetChanged();
@@ -107,6 +108,7 @@ public class myInventory extends AppCompatActivity implements ItemViewInterface{
         MyInventoryDialog myInventoryDialog = new MyInventoryDialog();
 
         Bundle bundle = new Bundle();
+        bundle.putString("key", myArraylist.get(position).getKey());
         bundle.putString("Name", myArraylist.get(position).getItem_name());
         bundle.putString("Category", myArraylist.get(position).getCat());
         bundle.putString("Price", myArraylist.get(position).getPrice());

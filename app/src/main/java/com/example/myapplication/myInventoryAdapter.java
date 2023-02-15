@@ -18,10 +18,10 @@ public class myInventoryAdapter extends RecyclerView.Adapter<myInventoryAdapter.
 
     private final ItemViewInterface itemViewInterface;
     Context context;
-    ArrayList<Inventory> list;
+    ArrayList<UpdateInventory> list;
 
 
-    public myInventoryAdapter(Context context, ArrayList<Inventory> list, ItemViewInterface itemViewInterface) {
+    public myInventoryAdapter(Context context, ArrayList<UpdateInventory> list, ItemViewInterface itemViewInterface) {
         this.context = context;
         this.list = list;
         this.itemViewInterface = itemViewInterface;
@@ -36,7 +36,7 @@ public class myInventoryAdapter extends RecyclerView.Adapter<myInventoryAdapter.
 
     @Override
     public void onBindViewHolder(@NonNull myInventoryAdapter.ViewHolder holder, int position) {
-        Inventory inventory = list.get(position);
+        UpdateInventory inventory = list.get(position);
         holder.name.setText(inventory.getItem_name());
         Picasso.get().load(inventory.getImageUrl()).fit().centerCrop().into(holder.image);
         //holder.description.setText(inventory.getDescription());
