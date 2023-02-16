@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -28,7 +29,7 @@ public class cart_frag extends Fragment implements ItemViewInterface{
 
     private ArrayList<Cart> cartArrayList;
     CartAdapter cartAdapter;
-    DatabaseReference databaseReference;
+    DatabaseReference cartref;
     StorageReference storageReference;
     RecyclerView recyclerView;
 
@@ -51,10 +52,60 @@ public class cart_frag extends Fragment implements ItemViewInterface{
         cartArrayList = new ArrayList<>();
         cartAdapter = new CartAdapter(getContext(), cartArrayList, this);
         String user = Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid();
-        databaseReference = FirebaseDatabase.getInstance().getReference("User").child("Inventory").child("Cart").child(user);
+        //databaseReference = FirebaseDatabase.getInstance().getReference("User").child("Inventory").child("Cart").child(user);
+        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("User").child("Inventory");
         storageReference = FirebaseStorage.getInstance().getReference("uploads");
 
-        databaseReference.addValueEventListener(new ValueEventListener() {
+        cartref = FirebaseDatabase.getInstance().getReference("User")
+                .child(user).child("Cart");
+        cartref.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                for (DataSnapshot childSnapshot: snapshot.getChildren()) {
+                    String cartID = childSnapshot.getKey();
+                    databaseReference.orderByChild(cartID).addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            for(DataSnapshot dataSnapshot: snapshot.getChildren())  {
+                                Cart cart = dataSnapshot.getValue(Cart.class);
+                                cartArrayList.add(cart);
+                            }
+                            cartAdapter.notifyDataSetChanged();
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
+            }
+
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot snapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+
+
+
+        /*databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for(DataSnapshot dataSnapshot : snapshot.getChildren()){
@@ -69,7 +120,7 @@ public class cart_frag extends Fragment implements ItemViewInterface{
             public void onCancelled(@NonNull DatabaseError error) {
 
             }
-        });
+        });*/
 
         recyclerView.setAdapter(cartAdapter);
 

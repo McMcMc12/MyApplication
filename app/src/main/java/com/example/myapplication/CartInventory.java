@@ -1,9 +1,9 @@
 package com.example.myapplication;
 
-public class Cart {
+public class CartInventory {
     private String key,item_name, description, price, cat, user, imageUrl;
 
-    public Cart(String key,String item_name, String description, String price, String cat, String user, String imageUrl) {
+    public CartInventory(String key, String item_name, String description, String price, String cat, String user, String imageUrl) {
         this.item_name = item_name;
         this.description = description;
         this.price = price;
@@ -12,7 +12,7 @@ public class Cart {
         this.imageUrl = imageUrl;
     }
 
-    public Cart() {
+    public CartInventory() {
         super();
     }
 

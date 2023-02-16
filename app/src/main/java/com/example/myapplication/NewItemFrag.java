@@ -24,7 +24,7 @@ import java.util.ArrayList;
 
 public class NewItemFrag extends Fragment implements ItemViewInterface{
 
-    private ArrayList<Inventory> itemArrayList;
+    private ArrayList<CartInventory> itemArrayList;
     ItemAdapter itemAdapter;
     DatabaseReference databaseReference;
     StorageReference storageReference;
@@ -36,6 +36,7 @@ public class NewItemFrag extends Fragment implements ItemViewInterface{
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
+
 
         return inflater.inflate(R.layout.fragment_new_item, container, false);
     }
@@ -59,7 +60,8 @@ public class NewItemFrag extends Fragment implements ItemViewInterface{
             @Override
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                 for (DataSnapshot childSnapshot: snapshot.child("Inventory").getChildren()) {
-                    Inventory inventory = childSnapshot.getValue(Inventory.class);
+                    CartInventory inventory = childSnapshot.getValue(CartInventory.class);
+                    inventory.setKey(childSnapshot.getKey());
                     itemArrayList.add(inventory);
                 }
                 itemAdapter.notifyDataSetChanged();
@@ -114,6 +116,8 @@ public class NewItemFrag extends Fragment implements ItemViewInterface{
 
         ItemDialog itemDialog = new ItemDialog();
         Bundle bundle = new Bundle();
+        bundle.putString("Seller", itemArrayList.get(position).getUser());
+        bundle.putString("key", itemArrayList.get(position).getKey());
         bundle.putString("Name",itemArrayList.get(position).getItem_name());
         bundle.putString("Category",itemArrayList.get(position).getCat());
         bundle.putString("Price",itemArrayList.get(position).getPrice());

@@ -44,13 +44,14 @@ public class ItemDialog extends AppCompatDialogFragment {
         Bundle bundle = getArguments();
 
         assert bundle != null;
+        String Seller = bundle.getString("Seller");
+        String key = bundle.getString("key");
         String ItemName = bundle.getString("Name");
         String ItemCat = bundle.getString("Category");
         String ItemPrice = bundle.getString("Price");
         String ItemDis = bundle.getString("Dis");
         String ItemUrl = bundle.getString("Url");
         String user = Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid();
-        String key = user + "_" + ItemName;
 
         name.setText(ItemName);
         cat.setText(ItemCat);
@@ -59,21 +60,25 @@ public class ItemDialog extends AppCompatDialogFragment {
         Picasso.get().load(ItemUrl).fit().centerCrop().into(iv);
 
         addCart.setOnClickListener(v -> {
-            Inventory Inventory = new Inventory(ItemName, ItemDis, ItemPrice, ItemCat, user, ItemUrl);
-            DatabaseReference rootref = FirebaseDatabase.getInstance().getReference("Cart");
-            DatabaseReference taskref = rootref.child(user).child(key);
-            taskref.setValue(Inventory).addOnCompleteListener(task -> {
-                if (task.isSuccessful()) {
-                    Toast.makeText(getContext(),"Item is succesfully registered!", Toast.LENGTH_LONG).show();
-                    Intent intent = new Intent();
-                    intent.setClass(getActivity(), Feed.class);
-                    startActivity(intent);
+            DatabaseReference rootref = FirebaseDatabase.getInstance().getReference("User").child(user).child("Cart");
 
-                }else{
-                    Toast.makeText(getContext(),"Fail to load", Toast.LENGTH_LONG).show();
+            if(!user.equals(Seller)){
 
-                }
-            });
+                rootref.child(key).setValue(key).addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        Toast.makeText(getContext(),"Item is succesfully registered!", Toast.LENGTH_LONG).show();
+                        Intent intent = new Intent();
+                        intent.setClass(getActivity(), Feed.class);
+                        startActivity(intent);
+                    }else{
+                        Toast.makeText(getContext(),"Fail to load", Toast.LENGTH_LONG).show();
+
+                    }
+                });
+            }else{
+                Toast.makeText(getContext(), "Cannot Buy Your Own Item", Toast.LENGTH_LONG).show();
+            }
+
 
         });
         back.setOnClickListener(v -> dismiss());
