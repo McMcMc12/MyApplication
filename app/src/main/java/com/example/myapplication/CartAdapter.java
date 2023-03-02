@@ -1,6 +1,7 @@
 package com.example.myapplication;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,10 +19,10 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> {
 
     private final ItemViewInterface itemViewInterface;
     Context context;
-    ArrayList<Cart> list;
+    ArrayList<CartInventory> list;
 
 
-    public CartAdapter(Context context, ArrayList<Cart> list, ItemViewInterface itemViewInterface) {
+    public CartAdapter(Context context, ArrayList<CartInventory> list, ItemViewInterface itemViewInterface) {
         this.context = context;
         this.list = list;
         this.itemViewInterface = itemViewInterface;
@@ -37,10 +38,14 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull CartAdapter.ViewHolder holder, int position) {
-        Cart cart = list.get(position);
-        holder.name.setText(cart.getItem_name());
-        Picasso.get().load(cart.getImageUrl()).fit().centerCrop().into(holder.image);
-
+        CartInventory cartInventory = list.get(position);
+        if (cartInventory != null) {
+            Log.d("CartAdapter", "Item name: " + cartInventory.getItem_name() + ", Image URL: " + cartInventory.getImageUrl());
+            holder.name.setText(cartInventory.getItem_name());
+            Picasso.get().load(cartInventory.getImageUrl()).fit().centerCrop().into(holder.image);
+        } else {
+            Log.e("CartAdapter", "Null inventory object at position " + position);
+        }
     }
 
     @Override
@@ -62,14 +67,12 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> {
                 public void onClick(View v) {
                     if(itemViewInterface != null){
                         int pos = getAdapterPosition();
-
                         if(pos != RecyclerView.NO_POSITION){
                             itemViewInterface.onItemClick(pos);
                         }
                     }
                 }
             });
-
         }
 
 

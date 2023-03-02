@@ -61,12 +61,11 @@ public class ItemDialog extends AppCompatDialogFragment {
 
         addCart.setOnClickListener(v -> {
             DatabaseReference rootref = FirebaseDatabase.getInstance().getReference("User").child(user).child("Cart");
-
             if(!user.equals(Seller)){
 
                 rootref.child(key).setValue(key).addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        Toast.makeText(getContext(),"Item is succesfully registered!", Toast.LENGTH_LONG).show();
+                        Toast.makeText(getContext(),"Item is succesfully Added!", Toast.LENGTH_LONG).show();
                         Intent intent = new Intent();
                         intent.setClass(getActivity(), Feed.class);
                         startActivity(intent);
