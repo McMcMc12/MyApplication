@@ -18,9 +18,6 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
 
@@ -29,9 +26,7 @@ public class cart_frag extends Fragment implements ItemViewInterface{
 
     private ArrayList<CartInventory> cartArrayList;
     CartAdapter cartAdapter;
-    DatabaseReference cartref;
     FirebaseUser user;
-    StorageReference storageReference;
     RecyclerView recyclerView;
 
     @Override
@@ -56,22 +51,44 @@ public class cart_frag extends Fragment implements ItemViewInterface{
         if (user != null) {
             String userId = user.getUid();
 
-            DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("User").child(userId).child("Cart");
-            storageReference = FirebaseStorage.getInstance().getReference("uploads");
+            DatabaseReference cartref = FirebaseDatabase.getInstance().getReference("User").child(userId).child("Cart");
 
-            databaseReference.addChildEventListener(new ChildEventListener() {
+            cartref.addChildEventListener(new ChildEventListener() {
                 @Override
                 public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                    String inventoryKey = snapshot.getValue(String.class);
-                    DatabaseReference inventoryRef = FirebaseDatabase.getInstance().getReference("User").child(userId).child("Inventory").child(inventoryKey);
 
-                    inventoryRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    String cartkey = snapshot.getValue(String.class);
 
-                        public void onDataChange(@NonNull DataSnapshot snapshot) {
-                            cartArrayList.clear();
-                            CartInventory inventory = snapshot.getValue(CartInventory.class);
-                            cartArrayList.add(inventory);
+                    DatabaseReference itemRef = FirebaseDatabase.getInstance().getReference("User");
+                    itemRef.addChildEventListener(new ChildEventListener() {
+                        @Override
+                        public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                            for (DataSnapshot childSnapshot: snapshot.child("Inventory").getChildren()) {
+
+
+                                CartInventory inventory = childSnapshot.getValue(CartInventory.class);
+                                inventory.setKey(childSnapshot.getKey());
+                                String itemKey = inventory.getKey();
+                                if(itemKey.equals(cartkey)){
+                                    cartArrayList.add(inventory);
+                                }
+                            }
                             cartAdapter.notifyDataSetChanged();
+                        }
+
+                        @Override
+                        public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
+                        }
+
+                        @Override
+                        public void onChildRemoved(@NonNull DataSnapshot snapshot) {
+
+                        }
+
+                        @Override
+                        public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
                         }
 
                         @Override
@@ -88,14 +105,7 @@ public class cart_frag extends Fragment implements ItemViewInterface{
 
                 @Override
                 public void onChildRemoved(@NonNull DataSnapshot snapshot) {
-                    String inventoryKey = snapshot.getValue(String.class);
-                    for (int i = 0; i < cartArrayList.size(); i++) {
-                        if (cartArrayList.get(i).getKey().equals(inventoryKey)) {
-                            cartArrayList.remove(i);
-                            cartAdapter.notifyDataSetChanged();
-                            break;
-                        }
-                    }
+
                 }
 
                 @Override
@@ -108,6 +118,7 @@ public class cart_frag extends Fragment implements ItemViewInterface{
 
                 }
             });
+
         }
 
 

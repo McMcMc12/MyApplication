@@ -1,7 +1,6 @@
 package com.example.myapplication;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,43 +37,39 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull CartAdapter.ViewHolder holder, int position) {
-        CartInventory cartInventory = list.get(position);
-        if (cartInventory != null) {
-            Log.d("CartAdapter", "Item name: " + cartInventory.getItem_name() + ", Image URL: " + cartInventory.getImageUrl());
+            CartInventory cartInventory = list.get(position);
             holder.name.setText(cartInventory.getItem_name());
             Picasso.get().load(cartInventory.getImageUrl()).fit().centerCrop().into(holder.image);
-        } else {
-            Log.e("CartAdapter", "Null inventory object at position " + position);
-        }
+
     }
 
     @Override
     public int getItemCount() {
-        return list.size();
-    }
+    return list.size();
+}
 
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
-        TextView name, description, price,cat, user;
-        ImageView image;
-        public ViewHolder(@NonNull View itemView, ItemViewInterface itemViewInterface) {
-            super(itemView);
-            name = itemView.findViewById(R.id.textView4);
-            image = itemView.findViewById(R.id.imageView4);
+public class ViewHolder extends RecyclerView.ViewHolder {
+    TextView name, description, price,cat, user;
+    ImageView image;
+    public ViewHolder(@NonNull View itemView, ItemViewInterface itemViewInterface) {
+        super(itemView);
+        name = itemView.findViewById(R.id.textView4);
+        image = itemView.findViewById(R.id.imageView4);
 
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if(itemViewInterface != null){
-                        int pos = getAdapterPosition();
-                        if(pos != RecyclerView.NO_POSITION){
-                            itemViewInterface.onItemClick(pos);
-                        }
+        itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(itemViewInterface != null){
+                    int pos = getAdapterPosition();
+                    if(pos != RecyclerView.NO_POSITION){
+                        itemViewInterface.onItemClick(pos);
                     }
                 }
-            });
-        }
-
-
+            }
+        });
     }
+
+
+}
 }

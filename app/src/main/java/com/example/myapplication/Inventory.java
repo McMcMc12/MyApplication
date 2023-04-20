@@ -1,7 +1,7 @@
 package com.example.myapplication;
 
 public class Inventory{
-    private String item_name, description, price, cat, user, imageUrl;
+    private String key, item_name, description, price, cat, user, imageUrl;
 
     public Inventory(String item_name, String description, String price, String cat, String user, String imageUrl) {
         this.item_name = item_name;

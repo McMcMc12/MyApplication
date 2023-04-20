@@ -42,10 +42,6 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
         Picasso.get().load(inventory.getImageUrl()).fit().centerCrop().into(holder.image);
 
 
-        //holder.description.setText(inventory.getDescription());
-        //holder.price.setText(inventory.getPrice());
-        //holder.cat.setText(inventory.getCat());
-        //holder.user.setText(inventory.getUser());
     }
 
     @Override
