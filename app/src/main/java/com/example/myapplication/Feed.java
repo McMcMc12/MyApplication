@@ -45,6 +45,9 @@ public class Feed extends AppCompatActivity {
         inflater.inflate(R.menu.main_menu, menu);
         return true;
     }
+    private void searchWidget(){
+
+    }
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {

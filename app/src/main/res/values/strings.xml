@@ -17,6 +17,15 @@
         <item>Books/Stationary</item>
         <item>Hobbies</item>
     </string-array>
+    <string-array name="searchcatergories">
+        <item>All</item>
+        <item>Food</item>
+        <item>Clothing</item>
+        <item>Electronics</item>
+        <item>Sports</item>
+        <item>Books/Stationary</item>
+        <item>Hobbies</item>
+    </string-array>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

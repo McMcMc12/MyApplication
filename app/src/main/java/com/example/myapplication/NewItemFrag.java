@@ -4,6 +4,9 @@
         import android.view.LayoutInflater;
         import android.view.View;
         import android.view.ViewGroup;
+        import android.widget.AdapterView;
+        import android.widget.ArrayAdapter;
+        import android.widget.Spinner;
 
         import androidx.annotation.NonNull;
         import androidx.annotation.Nullable;
@@ -25,10 +28,12 @@
         public class NewItemFrag extends Fragment implements ItemViewInterface{
 
             private ArrayList<CartInventory> itemArrayList;
+            private ArrayList<CartInventory> dialogItemArrayList;
             ItemAdapter itemAdapter;
             DatabaseReference databaseReference;
             StorageReference storageReference;
             RecyclerView recyclerView;
+            Spinner spinner;
 
 
 
@@ -45,6 +50,8 @@
 
 
                 recyclerView = view.findViewById(R.id.recycler_view);
+                spinner = view.findViewById(R.id.spinner);
+
                 recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
                 recyclerView.setHasFixedSize(true);
 
@@ -86,9 +93,53 @@
                     }
 
                 });
-
-
                 recyclerView.setAdapter(itemAdapter);
+
+
+                ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getContext(),
+                        R.array.searchcatergories, android.R.layout.simple_dropdown_item_1line);
+                adapter.setDropDownViewResource(android.R.layout.simple_dropdown_item_1line);
+                spinner.setAdapter(adapter);
+
+
+
+                spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                        ArrayList<CartInventory> filterOn = new ArrayList<>();
+                        String selectedCategory = parent.getItemAtPosition(position).toString();
+
+                        for (CartInventory item : itemArrayList) {
+                            if (selectedCategory.equals("All")) {
+                                filterOn.add(item);
+                            }else{
+                                if(item.getCat().equals(selectedCategory)){
+                                    filterOn.add(item);
+                                }
+                            }
+                        }
+
+                        if (selectedCategory.equals("All")) {
+                            dialogItemArrayList = itemArrayList;
+                            itemAdapter.notifyDataSetChanged();
+                            recyclerView.setAdapter(itemAdapter);
+                        } else {
+                            ItemSearchAdapter itemSearchAdapter = new ItemSearchAdapter(getContext(), filterOn, NewItemFrag.this::onItemClick);
+                            itemSearchAdapter.notifyItemChanged(position);
+                            itemSearchAdapter.notifyDataSetChanged();
+                            dialogItemArrayList = filterOn;
+                            recyclerView.setAdapter(itemSearchAdapter);
+                        }
+
+                    }
+
+
+                    @Override
+                    public void onNothingSelected(AdapterView<?> parent) {
+
+                    }
+
+                });
 
              }
 
@@ -98,13 +149,13 @@
 
                 ItemDialog itemDialog = new ItemDialog();
                 Bundle bundle = new Bundle();
-                bundle.putString("Seller", itemArrayList.get(position).getUser());
-                bundle.putString("key", itemArrayList.get(position).getKey());
-                bundle.putString("Name",itemArrayList.get(position).getItem_name());
-                bundle.putString("Category",itemArrayList.get(position).getCat());
-                bundle.putString("Price",itemArrayList.get(position).getPrice());
-                bundle.putString("Dis",itemArrayList.get(position).getDescription());
-                bundle.putString("Url", itemArrayList.get(position).getImageUrl());
+                bundle.putString("Seller", dialogItemArrayList.get(position).getUser());
+                bundle.putString("key", dialogItemArrayList.get(position).getKey());
+                bundle.putString("Name",dialogItemArrayList.get(position).getItem_name());
+                bundle.putString("Category",dialogItemArrayList.get(position).getCat());
+                bundle.putString("Price",dialogItemArrayList.get(position).getPrice());
+                bundle.putString("Dis",dialogItemArrayList.get(position).getDescription());
+                bundle.putString("Url", dialogItemArrayList.get(position).getImageUrl());
                 itemDialog.setArguments(bundle);
 
                 itemDialog.show(requireActivity().getSupportFragmentManager(), "item dialog");

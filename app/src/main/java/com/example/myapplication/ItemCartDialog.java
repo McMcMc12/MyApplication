@@ -1,9 +1,12 @@
 package com.example.myapplication;
 
+import static android.content.ContentValues.TAG;
+
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -53,7 +56,7 @@ public class ItemCartDialog extends AppCompatDialogFragment {
         String ItemDis = bundle.getString("Dis");
         String ItemUrl = bundle.getString("Url");
         String user = Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid();
-        String key = user + "_" + ItemName;
+        String ItemKey = bundle.getString("Key");
 
         name.setText(ItemName);
         cat.setText(ItemCat);
@@ -61,11 +64,13 @@ public class ItemCartDialog extends AppCompatDialogFragment {
         dis.setText(ItemDis);
         Picasso.get().load(ItemUrl).fit().centerCrop().into(iv);
 
+        System.out.println(ItemKey);
+
 
         back.setOnClickListener(v -> {
-            String user1 = FirebaseAuth.getInstance().getCurrentUser().getUid();
-            DatabaseReference reference = FirebaseDatabase.getInstance().getReference("User").child("Inventory").child(user1);
-            reference.child(key).removeValue().addOnCompleteListener(task -> {
+            Log.d(TAG, "Removing value with key: " + ItemKey);
+            DatabaseReference reference = FirebaseDatabase.getInstance().getReference("User").child(user).child("Cart").child(ItemKey);
+            reference.removeValue().addOnCompleteListener(task -> {
                 if(task.isSuccessful()) {
                     Intent intent = new Intent();
                     intent.setClass(getActivity(), Feed.class);
@@ -74,6 +79,7 @@ public class ItemCartDialog extends AppCompatDialogFragment {
                 }
             });
         });
+
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setView(view);

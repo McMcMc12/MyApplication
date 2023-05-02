@@ -136,6 +136,7 @@ public class cart_frag extends Fragment implements ItemViewInterface{
         bundle.putString("Price",cartArrayList.get(position).getPrice());
         bundle.putString("Dis",cartArrayList.get(position).getDescription());
         bundle.putString("Url", cartArrayList.get(position).getImageUrl());
+        bundle.putString("Key", cartArrayList.get(position).getKey());
         itemCartDialog.setArguments(bundle);
 
         itemCartDialog.show(requireActivity().getSupportFragmentManager(), "item dialog");
