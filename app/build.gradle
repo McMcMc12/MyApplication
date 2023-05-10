@@ -61,4 +61,10 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation("com.tbuonomo:dotsindicator:4.2")
 
+    //stripe SDK Server-Client
+    implementation 'com.stripe:stripe-android:20.24.2'
+    implementation 'com.squareup.okhttp3:okhttp:4.10.0'
+
+    //google volley
+    implementation 'com.android.volley:volley:1.2.1'
 }
