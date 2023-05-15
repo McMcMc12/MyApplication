@@ -1,15 +1,13 @@
 package com.example.myapplication;
 
-import com.google.android.gms.common.internal.Objects;
-
 public class User {
-    public String name, email, student, password;
+    public String name, email, student;
 
-    public User(String name, String email, String student, String password) {
+    public User(String name, String email, String student) {
         this.name = name;
         this.email = email;
         this.student = student;
-        this.password = password;
+
     }
 
     public String getName() {
@@ -24,7 +22,4 @@ public class User {
         return student;
     }
 
-    public String getpassword() {
-        return password;
-    }
 }

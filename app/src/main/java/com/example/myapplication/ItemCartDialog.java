@@ -35,23 +35,15 @@ import com.stripe.android.paymentsheet.PaymentSheetResult;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.RequestBody;
 
 public class ItemCartDialog extends AppCompatDialogFragment {
 
     PaymentSheet paymentSheet;
     String paymentIntentClientSecret ;
     PaymentSheet.CustomerConfiguration configuration;
-    Button buyButton;
 
 
     @NonNull
@@ -60,7 +52,6 @@ public class ItemCartDialog extends AppCompatDialogFragment {
         LayoutInflater inflater = requireActivity().getLayoutInflater();
         View view = inflater.inflate(R.layout.item_dialog, null);
         fetchAPI();
-        System.out.println(paymentIntentClientSecret);
         TextView name = view.findViewById(R.id.textView11);
         TextView cat = view.findViewById(R.id.textView18);
         TextView price = view.findViewById(R.id.textView19);
@@ -92,9 +83,10 @@ public class ItemCartDialog extends AppCompatDialogFragment {
 
         //Java-to-PHP
 
-        OkHttpClient client = new OkHttpClient();
+       /* OkHttpClient client = new OkHttpClient();
 
-        String url = "https://fyp2-7b907.web.app";
+        String url = "http://183.171.184.4:8000/";
+
         MediaType mediaType = MediaType.parse("application/json");
         RequestBody body = RequestBody.create(mediaType, "{"
                 + "\"Name\": \"" + ItemName + "\","
@@ -121,8 +113,7 @@ public class ItemCartDialog extends AppCompatDialogFragment {
             public void onResponse(Call call, okhttp3.Response response) throws IOException {
                 // Handle response
             }
-        });
-
+        });*/
 
         back.setOnClickListener(v -> {
             Log.d(TAG, "Removing value with key: " + ItemKey);
@@ -146,7 +137,7 @@ public class ItemCartDialog extends AppCompatDialogFragment {
                     paymentSheet.presentWithPaymentIntent(paymentIntentClientSecret,
                             new PaymentSheet.Configuration("Prototype Gateway", configuration));
                 }else{
-                    Toast.makeText(getContext(), "API is loading  .  .  . "+ paymentIntentClientSecret, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "API is loading  .  .  . ", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -176,12 +167,13 @@ public class ItemCartDialog extends AppCompatDialogFragment {
 
     public void fetchAPI(){
         RequestQueue queue = Volley.newRequestQueue(getActivity().getApplicationContext());
-        String url ="https://fyp2-7b907.web.app";//replace with demo server
+        String url ="http://192.168.225.233:8000/stripe/";//replace with demo server
 
         StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
+                        //System.out.println("Response is "+response);
                         try {
                             JSONObject jsonObject = new JSONObject(response);
                             configuration = new PaymentSheet.CustomerConfiguration(
@@ -189,7 +181,8 @@ public class ItemCartDialog extends AppCompatDialogFragment {
                                     jsonObject.getString("ephemeralKey")
                             );
                             paymentIntentClientSecret = jsonObject.getString("paymentIntent");
-                            PaymentConfiguration.init(getActivity().getApplicationContext(), jsonObject.getString("publishableKey"));
+                            PaymentConfiguration.init(getActivity().getApplicationContext(),
+                                    jsonObject.getString("publishableKey"));
 
 
                         } catch (JSONException e) {
@@ -199,16 +192,24 @@ public class ItemCartDialog extends AppCompatDialogFragment {
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
+                Log.e(TAG, "Error response: " + error.getMessage());
                 error.printStackTrace();
             }
         }){
             protected Map<String, String> getParams(){
                 Map<String,String> paramV = new HashMap<>();
                 paramV.put("authKey", "abc");
+                System.out.println(paramV);
+                System.out.println(paymentIntentClientSecret);
                 return paramV;
             }
+
+
         };
+        Log.d(TAG, "Sending request...");
         queue.add(stringRequest);
+        Log.d(TAG, "Request sent.");
+
     }
 
 }
