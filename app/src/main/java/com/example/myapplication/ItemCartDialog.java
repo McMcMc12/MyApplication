@@ -167,7 +167,7 @@ public class ItemCartDialog extends AppCompatDialogFragment {
 
     public void fetchAPI(){
         RequestQueue queue = Volley.newRequestQueue(getActivity().getApplicationContext());
-        String url ="http://192.168.225.233:8000/stripe/";//replace with demo server
+        String url ="http://192.168.15.233:8000/stripe/";//replace with demo server if using local host use ipv4
 
         StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
                 new Response.Listener<String>() {
